@@ -1,0 +1,22 @@
+{
+  "name": "view-gherkin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "./bin/view-gherkin",
+    "test": "mocha test"
+  },
+  "bin": {
+    "view-gherkin": "./bin/view-gherkin"
+  },
+  "author": "Marian Schubert",
+  "license": "ISC",
+  "dependencies": {
+    "gherkin": "^4.0.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.1.2"
+  }
+}
