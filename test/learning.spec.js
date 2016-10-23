@@ -17,6 +17,10 @@ function aScenario(content) {
   return "Scenario: Some Scenario\n" + indent((content || []).join("\n"))
 }
 
+function aBackground(content) {
+  return "Background:\n" + indent((content || []).join("\n"))
+}
+
 var they = it;
 
 describe('Gherkin', function () {
@@ -30,6 +34,8 @@ describe('Gherkin', function () {
     it('contains name, description and children', function () {
       var ast = parser.parse("Feature: My Feature\n"
                              + "  Some Description\n\n"
+                             + "  Background:\n"
+                             + "    Given background state\n"
                              + "  Scenario: Some Scenario\n"
                              + "  Scenario: Other Scenario")
 
@@ -37,7 +43,24 @@ describe('Gherkin', function () {
         name: 'My Feature',
         description: '  Some Description'
       })
-      expect(ast.feature.children.length).to.equal(2)
+
+      // background + scenarios
+      expect(ast.feature.children.length).to.equal(3)
+    })
+  })
+
+  describe('parsed Background' , function () {
+    it('contains steps', function () {
+      var background = parser.parse(aFeature([
+        aBackground(["Given state", "And other state"])
+      ])).feature.children[0]
+
+      expect(background.steps.length).to.equal(2)
+
+      expect(background.steps[0]).to.deep.contain({
+        keyword: 'Given ', text: 'state'})
+      expect(background.steps[1]).to.deep.contain({
+        keyword: 'And ', text: 'other state'})
     })
   })
 
@@ -86,6 +109,7 @@ describe('Gherkin', function () {
 describe('Feature builder', function () {
   it('returns feature as a string', function () {
     var feature = aFeature([
+      aBackground(["Given background state"]),
       aScenario([
         "Given state",
         "When action",
@@ -96,6 +120,8 @@ describe('Feature builder', function () {
     expect(feature.split("\n")).to.deep.equal([
       "Feature: Some Feature",
       "",
+      "  Background:",
+      "    Given background state",
       "  Scenario: Some Scenario",
       "    Given state",
       "    When action",
