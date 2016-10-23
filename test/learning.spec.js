@@ -1,19 +1,25 @@
 var expect = require('chai').expect
 var Gherkin = require('gherkin')
 
+function indent(s) {
+  var lines = (s || "").split("\n")
+
+  return lines.map(function(line) {
+    return "  " + line;
+  }).join("\n")
+}
+
 function aFeature(content) {
-  return "Feature: Some Feature\n\n"
-    + (Array.isArray(content) ? content.join("\n") : content)
+  return "Feature: Some Feature\n\n" + indent((content || []).join("\n"))
 }
 
 function aScenario(content) {
-  return "Scenario: Some Scenario\n\n"
-    + (Array.isArray(content) ? content.join("\n") : content)
+  return "Scenario: Some Scenario\n" + indent((content || []).join("\n"))
 }
 
 var they = it;
 
-describe('Gherkin' , function () {
+describe('Gherkin', function () {
   var parser
 
   beforeEach(function() {
@@ -21,15 +27,15 @@ describe('Gherkin' , function () {
   })
 
   describe('parsed Feature' , function () {
-    it('contains name, description and a list of scenarios', function () {
+    it('contains name, description and children', function () {
       var ast = parser.parse("Feature: My Feature\n"
-                             + "Some Description\n"
-                             + "Scenario: Some Scenario\n"
-                             + "Scenario: Other Scenario")
+                             + "  Some Description\n\n"
+                             + "  Scenario: Some Scenario\n"
+                             + "  Scenario: Other Scenario")
 
       expect(ast.feature).to.deep.contain({
         name: 'My Feature',
-        description: 'Some Description'
+        description: '  Some Description'
       })
       expect(ast.feature.children.length).to.equal(2)
     })
@@ -37,8 +43,8 @@ describe('Gherkin' , function () {
 
   describe('parsed Scenario' , function () {
     it('contains name', function () {
-      var scenario = parser.parse(aFeature("Scenario: Scenario #1"))
-          .feature.children[0]
+      var scenario = parser.parse(aFeature(["Scenario: Scenario #1"]))
+        .feature.children[0]
 
       expect(scenario).to.deep.contain({name: 'Scenario #1'})
     })
@@ -56,13 +62,13 @@ describe('Gherkin' , function () {
 
     describe('steps' , function () {
       they('contain keyword & text', function () {
-        var scenario = parser.parse(aFeature(
+        var scenario = parser.parse(aFeature([
           aScenario([
-            "  Given state",
-            "  When action",
-            "  Then outcome"
+            "Given state",
+            "When action",
+            "Then outcome"
           ])
-        )).feature.children[0]
+        ])).feature.children[0]
 
         expect(scenario.steps.length).to.equal(3)
 
@@ -74,5 +80,26 @@ describe('Gherkin' , function () {
           keyword: 'Then ', text: 'outcome'})
       })
     })
+  })
+})
+
+describe('Feature builder', function () {
+  it('returns feature as a string', function () {
+    var feature = aFeature([
+      aScenario([
+        "Given state",
+        "When action",
+        "Then outcome"
+      ]),
+    ])
+
+    expect(feature.split("\n")).to.deep.equal([
+      "Feature: Some Feature",
+      "",
+      "  Scenario: Some Scenario",
+      "    Given state",
+      "    When action",
+      "    Then outcome",
+    ])
   })
 })
