@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+
+var fs = require('fs')
+var path = require('path')
+var view = require('..')
+
+var program = path.basename(process.argv[1]);
+var fileName = process.argv[2];
+
+var gotFileName = (fileName && fs.existsSync(fileName))
+
+if (!gotFileName) {
+  console.log('Usage:', program, '<file.feature>')
+  process.exit(1)
+}
+
+console.log(JSON.stringify(view.parse(fileName)));
+
