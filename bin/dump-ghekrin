@@ -2,17 +2,32 @@
 
 var fs = require('fs')
 var path = require('path')
+var glob = require("glob")
 var view = require('..')
 
 var program = path.basename(process.argv[1]);
 var fileName = process.argv[2];
 
-var gotFileName = (fileName && fs.existsSync(fileName))
+try {
+  var stat = fs.statSync(fileName)
+} catch (error) {
+  if (error.code == 'ENOENT') {
+    console.log('Usage:', program, '<file.feature|directory>')
+    process.exit(1)
+  }
 
-if (!gotFileName) {
-  console.log('Usage:', program, '<file.feature>')
-  process.exit(1)
+  throw error;
 }
 
-console.log(JSON.stringify(view.parse(fileName)));
+if (stat.isDirectory()) {
+  glob(path.join(fileName, '**', '*.feature'), {}, (error, featureFiles) => {
+    var parsed = featureFiles.reduce((result, featureFile) => {
+      result[featureFile] = view.parse(featureFile)
+      return result
+    }, {})
 
+    console.log(JSON.stringify(parsed))
+  })
+} else if (stat.isFile()) {
+  console.log(JSON.stringify(view.parse(fileName)))
+}

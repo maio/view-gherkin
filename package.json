@@ -13,7 +13,8 @@
   "author": "Marian Schubert",
   "license": "ISC",
   "dependencies": {
-    "gherkin": "^4.0.0"
+    "gherkin": "^4.0.0",
+    "glob": "^7.1.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",
