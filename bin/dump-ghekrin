@@ -19,6 +19,10 @@ try {
   throw error;
 }
 
+function stringify(obj) {
+  return JSON.stringify(obj, null, 2)
+}
+
 if (stat.isDirectory()) {
   glob(path.join(fileName, '**', '*.feature'), {}, (error, featureFiles) => {
     var parsed = featureFiles.reduce((result, featureFile) => {
@@ -26,8 +30,8 @@ if (stat.isDirectory()) {
       return result
     }, {})
 
-    console.log(JSON.stringify(parsed))
+    console.log(stringify(parsed))
   })
 } else if (stat.isFile()) {
-  console.log(JSON.stringify(view.parse(fileName)))
+  console.log(stringify(view.parse(fileName)))
 }
